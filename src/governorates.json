@@ -1,0 +1,21 @@
+[
+  { "id": "baghdad", "iso": "IQ-BG", "ar": "بغداد", "en": "Baghdad", "ku": "بەغدا", "region": "federal", "capital": { "ar": "بغداد", "en": "Baghdad" }, "aliases": [] },
+  { "id": "basra", "iso": "IQ-BA", "ar": "البصرة", "en": "Basra", "ku": "بەسرە", "region": "federal", "capital": { "ar": "البصرة", "en": "Basra" }, "aliases": ["Basrah"] },
+  { "id": "nineveh", "iso": "IQ-NI", "ar": "نينوى", "en": "Nineveh", "ku": "نەینەوا", "region": "federal", "capital": { "ar": "الموصل", "en": "Mosul" }, "aliases": ["Ninawa", "Ninewa"] },
+  { "id": "anbar", "iso": "IQ-AN", "ar": "الأنبار", "en": "Anbar", "ku": "ئەنبار", "region": "federal", "capital": { "ar": "الرمادي", "en": "Ramadi" }, "aliases": [] },
+  { "id": "salahaddin", "iso": "IQ-SD", "ar": "صلاح الدين", "en": "Salah al-Din", "ku": "سەلاحەدین", "region": "federal", "capital": { "ar": "تكريت", "en": "Tikrit" }, "aliases": ["Salahuddin", "Salah ad Din", "Saladin"] },
+  { "id": "kirkuk", "iso": "IQ-KI", "ar": "كركوك", "en": "Kirkuk", "ku": "کەرکووک", "region": "federal", "capital": { "ar": "كركوك", "en": "Kirkuk" }, "aliases": [] },
+  { "id": "diyala", "iso": "IQ-DI", "ar": "ديالى", "en": "Diyala", "ku": "دیالە", "region": "federal", "capital": { "ar": "بعقوبة", "en": "Baqubah" }, "aliases": [] },
+  { "id": "wasit", "iso": "IQ-WA", "ar": "واسط", "en": "Wasit", "ku": "واسیت", "region": "federal", "capital": { "ar": "الكوت", "en": "Kut" }, "aliases": [] },
+  { "id": "babil", "iso": "IQ-BB", "ar": "بابل", "en": "Babil", "ku": "بابل", "region": "federal", "capital": { "ar": "الحلة", "en": "Hillah" }, "aliases": ["Babylon"] },
+  { "id": "karbala", "iso": "IQ-KA", "ar": "كربلاء", "en": "Karbala", "ku": "کەربەلا", "region": "federal", "capital": { "ar": "كربلاء", "en": "Karbala" }, "aliases": [] },
+  { "id": "najaf", "iso": "IQ-NA", "ar": "النجف", "en": "Najaf", "ku": "نەجەف", "region": "federal", "capital": { "ar": "النجف", "en": "Najaf" }, "aliases": [] },
+  { "id": "qadisiyyah", "iso": "IQ-QA", "ar": "القادسية", "en": "Al-Qadisiyyah", "ku": "قادسیە", "region": "federal", "capital": { "ar": "الديوانية", "en": "Diwaniyah" }, "aliases": ["Qadisiyah", "Diwaniyah"] },
+  { "id": "muthanna", "iso": "IQ-MU", "ar": "المثنى", "en": "Muthanna", "ku": "موسەننا", "region": "federal", "capital": { "ar": "السماوة", "en": "Samawah" }, "aliases": [] },
+  { "id": "dhiqar", "iso": "IQ-DQ", "ar": "ذي قار", "en": "Dhi Qar", "ku": "زیقار", "region": "federal", "capital": { "ar": "الناصرية", "en": "Nasiriyah" }, "aliases": ["Thi Qar"] },
+  { "id": "maysan", "iso": "IQ-MA", "ar": "ميسان", "en": "Maysan", "ku": "مەیسان", "region": "federal", "capital": { "ar": "العمارة", "en": "Amarah" }, "aliases": ["Missan"] },
+  { "id": "erbil", "iso": "IQ-AR", "ar": "أربيل", "en": "Erbil", "ku": "هەولێر", "region": "kurdistan", "capital": { "ar": "أربيل", "en": "Erbil" }, "aliases": ["Arbil", "Hawler", "Hewler", "هولير"] },
+  { "id": "sulaymaniyah", "iso": "IQ-SU", "ar": "السليمانية", "en": "Sulaymaniyah", "ku": "سلێمانی", "region": "kurdistan", "capital": { "ar": "السليمانية", "en": "Sulaymaniyah" }, "aliases": ["Slemani", "Sulaimani", "Sulaimaniya"] },
+  { "id": "duhok", "iso": "IQ-DA", "ar": "دهوك", "en": "Duhok", "ku": "دهۆک", "region": "kurdistan", "capital": { "ar": "دهوك", "en": "Duhok" }, "aliases": ["Dohuk", "Dahuk"] },
+  { "id": "halabja", "iso": null, "ar": "حلبجة", "en": "Halabja", "ku": "هەڵەبجە", "region": "kurdistan", "capital": { "ar": "حلبجة", "en": "Halabja" }, "aliases": [] }
+]
