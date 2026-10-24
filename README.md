@@ -32,12 +32,13 @@ getGovernorate('Basrah');
 //   en: 'Basra',
 //   ku: 'بەسرە',
 //   region: 'federal',
-//   capital: { ar: 'البصرة', en: 'Basra' },
+//   capital: { ar: 'البصرة', en: 'Basra', lat: 30.4952, lng: 47.8091 },
 //   aliases: ['Basrah']
 // }
 
 getGovernorate('هولير')?.en;   // 'Erbil'
 getGovernorate('IQ-NI')?.capital.en;  // 'Mosul'
+getGovernorate('Erbil')?.capital;     // { ar: 'أربيل', en: 'Erbil', lat: 36.1912, lng: 44.0094 }
 
 searchGovernorates('نجف').map((g) => g.en);  // ['Najaf']
 searchGovernorates('ba').map((g) => g.en);   // ['Baghdad', 'Basra', 'Babil', 'Anbar', 'Karbala']
@@ -75,7 +76,7 @@ interface Governorate {
   en: string;            // English name
   ku: string;            // Kurdish (Sorani) name
   region: 'federal' | 'kurdistan';
-  capital: { ar: string; en: string };
+  capital: { ar: string; en: string; lat: number; lng: number };  // capital city and its center
   aliases: string[];     // other spellings: 'Basrah', 'Arbil', 'Hawler'
 }
 ```
@@ -112,29 +113,31 @@ normalize('البَصْرَة');       // 'بصره'
 
 ## Data
 
-| Arabic | English | Kurdish | Capital | ISO | Region |
-| --- | --- | --- | --- | --- | --- |
-| بغداد | Baghdad | بەغدا | Baghdad | IQ-BG | federal |
-| البصرة | Basra | بەسرە | Basra | IQ-BA | federal |
-| نينوى | Nineveh | نەینەوا | Mosul | IQ-NI | federal |
-| الأنبار | Anbar | ئەنبار | Ramadi | IQ-AN | federal |
-| صلاح الدين | Salah al-Din | سەلاحەدین | Tikrit | IQ-SD | federal |
-| كركوك | Kirkuk | کەرکووک | Kirkuk | IQ-KI | federal |
-| ديالى | Diyala | دیالە | Baqubah | IQ-DI | federal |
-| واسط | Wasit | واسیت | Kut | IQ-WA | federal |
-| بابل | Babil | بابل | Hillah | IQ-BB | federal |
-| كربلاء | Karbala | کەربەلا | Karbala | IQ-KA | federal |
-| النجف | Najaf | نەجەف | Najaf | IQ-NA | federal |
-| القادسية | Al-Qadisiyyah | قادسیە | Diwaniyah | IQ-QA | federal |
-| المثنى | Muthanna | موسەننا | Samawah | IQ-MU | federal |
-| ذي قار | Dhi Qar | زیقار | Nasiriyah | IQ-DQ | federal |
-| ميسان | Maysan | مەیسان | Amarah | IQ-MA | federal |
-| أربيل | Erbil | هەولێر | Erbil | IQ-AR | kurdistan |
-| السليمانية | Sulaymaniyah | سلێمانی | Sulaymaniyah | IQ-SU | kurdistan |
-| دهوك | Duhok | دهۆک | Duhok | IQ-DA | kurdistan |
-| حلبجة | Halabja | هەڵەبجە | Halabja | — | kurdistan |
+| Arabic | English | Kurdish | Capital | Coordinates | ISO | Region |
+| --- | --- | --- | --- | --- | --- | --- |
+| بغداد | Baghdad | بەغدا | Baghdad | 33.3062, 44.3872 | IQ-BG | federal |
+| البصرة | Basra | بەسرە | Basra | 30.4952, 47.8091 | IQ-BA | federal |
+| نينوى | Nineveh | نەینەوا | Mosul | 36.3416, 43.1291 | IQ-NI | federal |
+| الأنبار | Anbar | ئەنبار | Ramadi | 33.4260, 43.2999 | IQ-AN | federal |
+| صلاح الدين | Salah al-Din | سەلاحەدین | Tikrit | 34.6158, 43.6786 | IQ-SD | federal |
+| كركوك | Kirkuk | کەرکووک | Kirkuk | 35.4719, 44.3954 | IQ-KI | federal |
+| ديالى | Diyala | دیالە | Baqubah | 33.7447, 44.6328 | IQ-DI | federal |
+| واسط | Wasit | واسیت | Kut | 32.5147, 45.8189 | IQ-WA | federal |
+| بابل | Babil | بابل | Hillah | 32.4822, 44.4328 | IQ-BB | federal |
+| كربلاء | Karbala | کەربەلا | Karbala | 32.5984, 44.0158 | IQ-KA | federal |
+| النجف | Najaf | نەجەف | Najaf | 32.0010, 44.3300 | IQ-NA | federal |
+| القادسية | Al-Qadisiyyah | قادسیە | Diwaniyah | 31.9892, 44.9247 | IQ-QA | federal |
+| المثنى | Muthanna | موسەننا | Samawah | 31.3079, 45.2827 | IQ-MU | federal |
+| ذي قار | Dhi Qar | زیقار | Nasiriyah | 31.0440, 46.2399 | IQ-DQ | federal |
+| ميسان | Maysan | مەیسان | Amarah | 31.8498, 47.1496 | IQ-MA | federal |
+| أربيل | Erbil | هەولێر | Erbil | 36.1912, 44.0094 | IQ-AR | kurdistan |
+| السليمانية | Sulaymaniyah | سلێمانی | Sulaymaniyah | 35.5571, 45.4426 | IQ-SU | kurdistan |
+| دهوك | Duhok | دهۆک | Duhok | 36.8543, 42.9925 | IQ-DA | kurdistan |
+| حلبجة | Halabja | هەڵەبجە | Halabja | 35.1792, 45.9874 | — | kurdistan |
 
 Halabja was approved as Iraq's 19th governorate by the Iraqi parliament in 2025. It doesn't have an ISO 3166-2 code yet, so its `iso` is `null`.
+
+Coordinates are the center of each capital city, from [OpenStreetMap](https://www.openstreetmap.org) (Kut and Diwaniyah from [Wikidata](https://www.wikidata.org)), rounded to 4 decimal places (about 11 m). Sources place a city's center differently by up to about 3 km, so use them for map pins and distances, not as exact addresses.
 
 ## Roadmap
 

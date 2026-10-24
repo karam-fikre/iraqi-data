@@ -38,6 +38,21 @@ describe('Governorate data', () => {
     }
   });
 
+  it('has capital coordinates inside Iraq, with at most 4 decimal places', () => {
+    for (const { id, capital } of governorates) {
+      assert.ok(capital.lat > 29 && capital.lat < 37.4, `${id}: lat ${capital.lat}`);
+      assert.ok(capital.lng > 38.7 && capital.lng < 48.6, `${id}: lng ${capital.lng}`);
+      for (const n of [capital.lat, capital.lng]) assert.strictEqual(n, Number(n.toFixed(4)), `${id}: ${n}`);
+    }
+  });
+
+  it('has the Kurdistan Region capitals in the north and Basra in the south', () => {
+    const lat = (id: string) => getGovernorate(id)!.capital.lat;
+    for (const id of ['erbil', 'sulaymaniyah', 'duhok', 'halabja']) assert.ok(lat(id) > 35, id);
+    assert.ok(lat('basra') < lat('baghdad'));
+    assert.ok(getGovernorate('basra')!.capital.lng > getGovernorate('anbar')!.capital.lng);
+  });
+
   it('cannot be changed by an app', () => {
     assert.ok(Object.isFrozen(governorates));
     assert.ok(Object.isFrozen(governorates[0]));

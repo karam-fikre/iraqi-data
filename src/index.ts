@@ -13,7 +13,8 @@ export interface Governorate {
   readonly ku: string;
   /** Federal Iraq or the Kurdistan Region */
   readonly region: Region;
-  readonly capital: { readonly ar: string; readonly en: string };
+  /** The governorate's capital city, with the latitude and longitude of its center */
+  readonly capital: { readonly ar: string; readonly en: string; readonly lat: number; readonly lng: number };
   /** Other spellings people use: Basrah, Arbil, Hawler */
   readonly aliases: readonly string[];
 }
