@@ -1,6 +1,6 @@
 {
   "name": "iraqi-data",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Iraqi governorates and districts in Arabic, English and Kurdish, with search that handles spelling variations",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
