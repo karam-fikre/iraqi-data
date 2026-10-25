@@ -77,6 +77,7 @@ describe('normalize', () => {
   it('reads Kurdish letters the same as their Arabic-keyboard versions', () => {
     assert.strictEqual(normalize('سلێمانی'), normalize('سليماني'));
     assert.strictEqual(normalize('دهۆک'), normalize('دهوك'));
+    assert.strictEqual(normalize('دھۆک'), normalize('دهوك'));
   });
 });
 
