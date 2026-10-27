@@ -165,3 +165,7 @@ export function getDistrictsByGovernorate(governorate: string): District[] {
   const id = getGovernorate(governorate)?.id;
   return districts.filter((d) => d.governorateId === id);
 }
+
+export { parseMobile, isValidMobile, carriers } from "./phone";
+export type { Carrier, CarrierNames, MobileNumber } from "./phone";
+export { toLatinDigits, toArabicDigits, formatIQD } from "./format";

@@ -6,7 +6,7 @@
 [![CI](https://github.com/karam-fikre/iraqi-data/actions/workflows/ci.yml/badge.svg)](https://github.com/karam-fikre/iraqi-data/actions/workflows/ci.yml)
 [![license](https://img.shields.io/npm/l/iraqi-data.svg)](LICENSE)
 
-The governorates of Iraq and their districts in Arabic, English and Kurdish, ready for address forms, dropdowns and delivery apps. Lookup and search understand the different ways people spell the same place: `البصرة`, `البصره`, `Basrah` and `بەسرە` all find Basra.
+The governorates of Iraq and their districts in Arabic, English and Kurdish, ready for address forms, dropdowns and delivery apps. Lookup and search understand the different ways people spell the same place: `البصرة`, `البصره`, `Basrah` and `بەسرە` all find Basra. It also reads and checks Iraqi mobile numbers, however they're typed, and tells you the carrier, and it converts Arabic digits and formats prices in dinars.
 
 Works in **Node.js**, the **browser**, **React**, **React Native / Expo** and **Vue**, with TypeScript types included. No dependencies.
 
@@ -18,7 +18,7 @@ npm install iraqi-data
 yarn add iraqi-data
 ```
 
-The whole package, data included, is about 11 KB gzipped.
+The whole package, data included, is about 12 KB gzipped.
 
 ## Usage
 
@@ -66,6 +66,41 @@ getDistrict('ابو غريب');
 getDistrict('الدغارة')?.en;                   // 'Akkad' (Daghara is its seat)
 getDistrictsByGovernorate('البصرة').length;    // 11
 searchDistricts('كر', { governorate: 'baghdad' }).map((d) => d.en);  // ['Karkh']
+```
+
+### Mobile numbers
+
+```ts
+import { parseMobile, isValidMobile, carriers } from 'iraqi-data';
+
+parseMobile('٠٧٧٠ ١٢٣ ٤٥٦٧');
+// {
+//   e164: '+9647701234567',
+//   local: '0770 123 4567',
+//   international: '+964 770 123 4567',
+//   carrier: 'asiacell'
+// }
+
+parseMobile('+964 780 123 4567')?.carrier;  // 'zain'
+isValidMobile('0750-123-4567');             // true
+isValidMobile('0770 123 456');              // false (a digit short)
+
+const number = parseMobile('0750 123 4567');
+if (number?.carrier) carriers[number.carrier].ku;  // 'کورەک'
+```
+
+Store `e164` in your database and show `local` to people, so the same number typed two ways is saved once.
+
+### Digits and prices
+
+```ts
+import { toLatinDigits, toArabicDigits, formatIQD } from 'iraqi-data';
+
+toLatinDigits('١٢٫٥');           // '12.5' (for a number field typed on an Arabic keyboard)
+toArabicDigits('شارع 14 رمضان');  // 'شارع ١٤ رمضان'
+
+formatIQD(25000);                 // '25,000 IQD'
+formatIQD(25000, { lang: 'ar' }); // '25,000 د.ع'
 ```
 
 ### Address dropdowns (React)
@@ -181,6 +216,49 @@ normalize('Al-Qadisiyyah');  // 'qadisiyyah'
 normalize('البَصْرَة');       // 'بصره'
 ```
 
+### `parseMobile(input: string): MobileNumber | undefined`
+
+Reads an Iraqi mobile number and returns it in standard formats, with its carrier. Returns `undefined` for anything else, landlines included.
+
+```ts
+interface MobileNumber {
+  e164: string;           // to store: '+9647701234567'
+  local: string;          // as written in Iraq: '0770 123 4567'
+  international: string;  // for calling from abroad: '+964 770 123 4567'
+  carrier: 'asiacell' | 'zain' | 'korek' | null;  // null for the smaller networks
+}
+```
+
+It accepts the ways people type a number:
+
+| Accepts | Example |
+| --- | --- |
+| With or without the 0 | `07701234567`, `7701234567` |
+| The country code | `+964 770…`, `00964 770…`, `964 770…`, `+964 0770…` |
+| Spaces, dashes, dots and brackets | `0770-123-4567`, `(0770) 123 4567` |
+| Arabic and Kurdish digits | `٠٧٧٠١٢٣٤٥٦٧`, `۰۷۵۰۱۲۳۴۵۶۷` |
+| Invisible direction marks, copied with Arabic text | `‎+964 770 123 4567‏` |
+
+### `isValidMobile(input: string): boolean`
+
+Whether the input is an Iraqi mobile number that `parseMobile` can read. Use it to validate a form field.
+
+### `carriers: Record<'asiacell' | 'zain' | 'korek', { ar: string; en: string; ku: string }>`
+
+The name of each carrier in Arabic, English and Kurdish, to show the `carrier` that `parseMobile` returns: `carriers.zain.ar` is `'زين'`. The object is frozen.
+
+### `toLatinDigits(text: string): string`
+
+Turns Arabic and Kurdish digits (`٠-٩`, and the `۰-۹` form some keyboards type) into `0-9`, and the Arabic decimal point `٫` and thousands separator `٬` into `.` and `,`. The rest of the text is kept. Use it before `Number()` or `parseInt()` on anything typed on an Arabic or Kurdish keyboard, which would otherwise give `NaN`.
+
+### `toArabicDigits(text: string): string`
+
+Turns `0-9` into the digits used in Arabic and Kurdish text (`٠-٩`), and keeps the rest of the text.
+
+### `formatIQD(amount: number, options?: { lang?: 'ar' | 'ku' | 'en' }): string`
+
+Formats an amount of Iraqi dinars the way prices are written in Iraq: rounded to whole dinars, thousands separated by commas, followed by `IQD`, or `د.ع` with `lang: 'ar'` or `lang: 'ku'` (Arabic and Kurdish write it the same way). Throws a `RangeError` for `NaN` or `Infinity`. For Arabic and Kurdish digits, pass the result to `toArabicDigits`.
+
 ## Data
 
 ### Governorates
@@ -247,8 +325,22 @@ The list is the one Iraq's 2024 census used:
 
 Each `center` is the town the district is run from. It's often a town of the same name, but not always: Mada'in is run from Salman Pak, and Pshdar from Qaladiza. A few districts have no separate town, such as Baghdad's newest (Sadr City 1 and 2, Zawraa, Zuhur) and Bamo in Halabja, so their point is the middle of the area. Coordinates are from OpenStreetMap, rounded to 4 decimal places.
 
+### Mobile networks
+
+Iraqi mobile numbers are 07 followed by 9 digits. The next digit tells the network:
+
+| Prefix | Network | Arabic | Kurdish | `carrier` |
+| --- | --- | --- | --- | --- |
+| 075x | Korek | كورك | کورەک | `'korek'` |
+| 077x | Asiacell | آسياسيل | ئاسیاسێڵ | `'asiacell'` |
+| 078x, 079x | Zain | زين | زین | `'zain'` |
+| 073x, 074x, 076x | Smaller networks (Omnnea, Itisaluna, ITPC…) | | | `null` |
+
+`carrier` is the network the prefix was given to, which is the one the number was issued on.
+
 ## Sources
 
+- Mobile prefixes: [libphonenumber](https://github.com/google/libphonenumber) (Google)
 - District list: [COSIT Annual Statistical Abstract 2024](https://cosit.gov.iq/documents/AAS2024/01.pdf) and the 2024 census results, as published by [City Population](https://www.citypopulation.de/en/iraq/admin/)
 - District P-codes: [OCHA / Iraq Central Statistics Office](https://data.humdata.org/dataset/cod-ab-irq), [CC BY-IGO](https://creativecommons.org/licenses/by/3.0/igo/)
 - Coordinates: © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, and [Wikidata](https://www.wikidata.org)
