@@ -137,6 +137,27 @@ export function AddressSelect() {
 
 استخدم `g.en` / `d.en` أو `g.ku` / `d.ku` للأسماء بالإنجليزية أو الكردية. احفظ المعرّفات (`'baghdad'` و `'abughraib'` …) في قاعدة بياناتك، وليس الأسماء المعروضة. المعرّف لا يتغير أبداً، أما تهجئة الاسم فقد تُصحَّح في إصدار لاحق.
 
+### أقرب مكان (GPS)
+
+املأ العنوان من موقع الهاتف:
+
+```ts
+import { getNearestDistrict, getNearestGovernorate } from 'iraqi-data';
+
+navigator.geolocation.getCurrentPosition(({ coords }) => {
+  const district = getNearestDistrict(coords.latitude, coords.longitude, { maxDistance: 50 });
+  if (district) {
+    setGovernorate(district.governorateId);
+    setDistrict(district.id);
+  }
+});
+
+getNearestDistrict(33.2625, 44.2346)?.ar;     // 'أبو غريب' (مطار بغداد)
+getNearestGovernorate(30.549, 47.662)?.ar;    // 'البصرة' (مطار البصرة)
+```
+
+تجد أقرب مركز قضاء، وليس القضاء الذي تقع فيه النقطة، لذا قد تختار القضاء المجاور قرب الحدود. اسمح للمستخدم بتغيير ما تملؤه.
+
 ## الواجهة البرمجية (API)
 
 ### `governorates: readonly Governorate[]`
@@ -196,6 +217,16 @@ interface District {
 ### `getDistrictsByGovernorate(governorate: string): District[]`
 
 أقضية محافظة واحدة، تُحدَّد بأي قيمة تقبلها `getGovernorate`: `'basra'` أو `'البصرة'` أو `'IQ-BA'`. تُرجع `[]` لمحافظة غير معروفة.
+
+### `getNearestDistrict(lat: number, lng: number, options?: { maxDistance?: number }): District | undefined`
+
+القضاء الذي يقع مركزه أقرب إلى نقطة، مثل الموقع الذي يعطيه الهاتف. مرّر `maxDistance` بالكيلومتر لتحصل على `undefined` لنقطة أبعد من ذلك عن كل مراكز الأقضية، مثل نقطة خارج العراق: بدونه، تُرجع مدينة الكويت قضاء الفاو، على بعد 82 كم. ترمي `RangeError` لخط عرض أو طول ليس رقماً أو خارج المدى.
+
+هي أقرب مركز، وليس القضاء الذي تقع فيه النقطة، لذا قد تخطئ قرب الحدود.
+
+### `getNearestGovernorate(lat: number, lng: number, options?: { maxDistance?: number }): Governorate | undefined`
+
+محافظة أقرب قضاء. هذا أقرب إلى الصحة من أقرب مركز محافظة، لأن محافظات مثل الأنبار أكبر بكثير من غيرها. تقبل خيارات `getNearestDistrict` نفسها.
 
 ### `normalize(text: string): string`
 

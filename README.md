@@ -137,6 +137,27 @@ export function AddressSelect() {
 
 Use `g.ar` / `d.ar` or `g.ku` / `d.ku` for an Arabic or Kurdish form. Store the ids (`'baghdad'`, `'abughraib'`, …) in your database, not the display names. Ids never change, while a name's spelling may be corrected in a later version.
 
+### Nearest place (GPS)
+
+Fill in the address from the phone's location:
+
+```ts
+import { getNearestDistrict, getNearestGovernorate } from 'iraqi-data';
+
+navigator.geolocation.getCurrentPosition(({ coords }) => {
+  const district = getNearestDistrict(coords.latitude, coords.longitude, { maxDistance: 50 });
+  if (district) {
+    setGovernorate(district.governorateId);
+    setDistrict(district.id);
+  }
+});
+
+getNearestDistrict(33.2625, 44.2346)?.en;     // 'Abu Ghraib' (Baghdad airport)
+getNearestGovernorate(30.549, 47.662)?.en;    // 'Basra' (Basra airport)
+```
+
+It finds the closest district center, not the district a point is in, so near a border it can pick the neighbor. Let people change what it fills in.
+
 ## API
 
 ### `governorates: readonly Governorate[]`
@@ -196,6 +217,16 @@ Finds every district whose name contains the query, ranked like `searchGovernora
 ### `getDistrictsByGovernorate(governorate: string): District[]`
 
 The districts of one governorate, found by anything `getGovernorate` accepts: `'basra'`, `'البصرة'`, `'IQ-BA'`. Returns `[]` for an unknown governorate.
+
+### `getNearestDistrict(lat: number, lng: number, options?: { maxDistance?: number }): District | undefined`
+
+The district whose center is closest to a point, such as the location a phone reports. Pass `maxDistance` in km to get `undefined` for a point farther than that from every district center, such as one outside Iraq: without it, Kuwait City returns Faw, 82 km away. Throws a `RangeError` for a latitude or longitude that isn't a number or is out of range.
+
+It's the closest center, not the district the point is in, so it can be wrong near a border.
+
+### `getNearestGovernorate(lat: number, lng: number, options?: { maxDistance?: number }): Governorate | undefined`
+
+The governorate of the nearest district. That's closer to the truth than the nearest capital, as governorates like Anbar are much bigger than others. Takes the same options as `getNearestDistrict`.
 
 ### `normalize(text: string): string`
 

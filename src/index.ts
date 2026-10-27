@@ -166,6 +166,46 @@ export function getDistrictsByGovernorate(governorate: string): District[] {
   return districts.filter((d) => d.governorateId === id);
 }
 
+const RAD = Math.PI / 180;
+
+// Distance in km between two points along the Earth's surface (haversine)
+function distanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const a =
+    Math.sin(((lat2 - lat1) * RAD) / 2) ** 2 +
+    Math.cos(lat1 * RAD) * Math.cos(lat2 * RAD) * Math.sin(((lng2 - lng1) * RAD) / 2) ** 2;
+  return 12742 * Math.asin(Math.sqrt(a));
+}
+
+/**
+ * The district whose center is closest to a point, such as the location a
+ * phone reports. It's the closest center, not the district the point is in,
+ * so it can be wrong near a border. Pass `maxDistance` in km to get undefined
+ * for a point farther than that from every center, such as one outside Iraq.
+ */
+export function getNearestDistrict(lat: number, lng: number, options: { maxDistance?: number } = {}): District | undefined {
+  if (!(Math.abs(lat) <= 90 && Math.abs(lng) <= 180)) throw new RangeError(`Not a location: ${lat}, ${lng}`);
+  let nearest: District | undefined;
+  let min = options.maxDistance ?? Infinity;
+  for (const d of districts) {
+    const km = distanceKm(lat, lng, d.center.lat, d.center.lng);
+    if (km < min) {
+      nearest = d;
+      min = km;
+    }
+  }
+  return nearest;
+}
+
+/**
+ * The governorate of the nearest district (see `getNearestDistrict`), which
+ * is closer to the truth than the nearest capital, as governorates like Anbar
+ * are far bigger than others.
+ */
+export function getNearestGovernorate(lat: number, lng: number, options: { maxDistance?: number } = {}): Governorate | undefined {
+  const id = getNearestDistrict(lat, lng, options)?.governorateId;
+  return governorates.find((g) => g.id === id);
+}
+
 export { parseMobile, isValidMobile, carriers } from "./phone";
 export type { Carrier, CarrierNames, MobileNumber } from "./phone";
 export { toLatinDigits, toArabicDigits, formatIQD } from "./format";
