@@ -1,6 +1,6 @@
 {
   "name": "iraqi-data",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Iraqi governorates and districts in Arabic, English and Kurdish, with search that handles spelling variations, Iraqi mobile number validation with carrier detection, and helpers for Arabic digits and dinar prices",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
