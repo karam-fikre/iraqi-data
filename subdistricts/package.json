@@ -1,0 +1,5 @@
+{
+  "main": "../dist/subdistricts.js",
+  "module": "../dist/subdistricts.mjs",
+  "types": "../dist/subdistricts.d.ts"
+}

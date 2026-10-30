@@ -6,7 +6,7 @@
 [![CI](https://github.com/karam-fikre/iraqi-data/actions/workflows/ci.yml/badge.svg)](https://github.com/karam-fikre/iraqi-data/actions/workflows/ci.yml)
 [![license](https://img.shields.io/npm/l/iraqi-data.svg)](LICENSE)
 
-The governorates of Iraq and their districts in Arabic, English and Kurdish, ready for address forms, dropdowns and delivery apps. Lookup and search understand the different ways people spell the same place: `البصرة`, `البصره`, `Basrah` and `بەسرە` all find Basra. It also reads and checks Iraqi mobile numbers, however they're typed, and tells you the carrier, and it converts Arabic digits and formats prices in dinars.
+The governorates of Iraq, their districts and sub-districts in Arabic, English and Kurdish, ready for address forms, dropdowns and delivery apps. Lookup and search understand the different ways people spell the same place: `البصرة`, `البصره`, `Basrah` and `بەسرە` all find Basra. It also reads and checks Iraqi mobile numbers, however they're typed, and tells you the carrier, and it converts Arabic digits and formats prices in dinars.
 
 Works in **Node.js**, the **browser**, **React**, **React Native / Expo** and **Vue**, with TypeScript types included. No dependencies.
 
@@ -18,7 +18,7 @@ npm install iraqi-data
 yarn add iraqi-data
 ```
 
-The whole package, data included, is about 12 KB gzipped.
+The main package, data included, is about 13 KB gzipped. Sub-districts add about 26 KB, only if you import them.
 
 ## Usage
 
@@ -66,6 +66,34 @@ getDistrict('ابو غريب');
 getDistrict('الدغارة')?.en;                   // 'Akkad' (Daghara is its seat)
 getDistrictsByGovernorate('البصرة').length;    // 11
 searchDistricts('كر', { governorate: 'baghdad' }).map((d) => d.en);  // ['Karkh']
+```
+
+### Sub-districts
+
+Sub-districts (نواحي) have their own import, so apps that don't use them don't carry their data.
+
+```ts
+import { getSubdistrict, searchSubdistricts, getSubdistrictsByDistrict } from 'iraqi-data/subdistricts';
+
+getSubdistrict('بعشيقة');
+// {
+//   id: 'bashiqa',
+//   districtId: 'mosul',
+//   governorateId: 'nineveh',
+//   pcode: 'IQG15Q05N03',
+//   ar: 'بعشيقة',
+//   en: 'Bashiqa',
+//   ku: 'بەعشیقە',
+//   isCenter: false,
+//   center: { ar: 'بعشيقة', en: 'Bashiqa', lat: 36.4505, lng: 43.3498 },
+//   aliases: ['Bashika', 'Bashiqah']
+// }
+
+getSubdistrictsByDistrict('الموصل').map((s) => s.en);
+// ['Mosul Center', 'Bashiqa', 'Shoura', 'Hammam al-Alil', 'Qayyarah', 'Mahalabiya']
+
+getSubdistrict('السلام', { district: 'الخالص' })?.districtId;  // 'khalis' (the name is used in two districts)
+searchSubdistricts('سلام', { governorate: 'maysan' }).map((s) => s.en);  // ['Salam']
 ```
 
 ### Mobile numbers
@@ -228,6 +256,41 @@ It's the closest center, not the district the point is in, so it can be wrong ne
 
 The governorate of the nearest district. That's closer to the truth than the nearest capital, as governorates like Anbar are much bigger than others. Takes the same options as `getNearestDistrict`.
 
+### `subdistricts: readonly Subdistrict[]`
+
+Imported from `iraqi-data/subdistricts`, like the functions below. All 434 sub-districts: 252 نواحي and one center for each of the 182 districts. They're in the same order as `districts`, each district's center first. The array and its objects are frozen.
+
+```ts
+interface Subdistrict {
+  id: string;             // stable id to store: 'bashiqa'
+  districtId: string;     // the district's id: 'mosul'
+  governorateId: string;  // the governorate's id: 'nineveh'
+  pcode: string | null;   // OCHA P-code (null if OCHA doesn't list it)
+  ar: string;             // Arabic name
+  en: string;             // English name
+  ku: string;             // Kurdish (Sorani) name: a draft, see Data
+  isCenter: boolean;      // true for the area around the district's own seat (مركز القضاء)
+  center: { ar: string; en: string; lat: number; lng: number } | null;  // null if no reliable location is known
+  aliases: string[];      // other spellings and names
+}
+```
+
+### `getSubdistrict(query: string, options?: { district?: string }): Subdistrict | undefined`
+
+Finds one sub-district by its id, P-code, or full name in any language, including the aliases. A district's name finds its center. Some names are used in more than one district, so pass `district` (anything `getDistrict` accepts) to pick one.
+
+### `searchSubdistricts(query: string, options?: { district?: string; governorate?: string }): Subdistrict[]`
+
+Finds every sub-district whose name contains the query, ranked like `searchGovernorates`. Pass `district` or `governorate` to search only inside it.
+
+### `getSubdistrictsByDistrict(district: string): Subdistrict[]`
+
+The sub-districts of one district, found by anything `getDistrict` accepts. Returns `[]` for an unknown district.
+
+### `getNearestSubdistrict(lat: number, lng: number, options?: { maxDistance?: number }): Subdistrict | undefined`
+
+The sub-district whose center is closest to a point, skipping those with no known location. It works like `getNearestDistrict`, with the same limits.
+
 ### `normalize(text: string): string`
 
 The function lookup and search use to compare names. It's exported so you can compare your own stored values the same way.
@@ -356,6 +419,15 @@ The list is the one Iraq's 2024 census used:
 
 Each `center` is the town the district is run from. It's often a town of the same name, but not always: Mada'in is run from Salman Pak, and Pshdar from Qaladiza. A few districts have no separate town, such as Baghdad's newest (Sadr City 1 and 2, Zawraa, Zuhur) and Bamo in Halabja, so their point is the middle of the area. Coordinates are from OpenStreetMap, rounded to 4 decimal places.
 
+### Sub-districts
+
+There are 252 sub-districts (نواحي) and one center (مركز قضاء) for each of the 182 districts. COSIT's table has 432 rows because it counts the centers too.
+
+- **Federal Iraq** matches COSIT's count for all 15 governorates. COSIT prints the rows of Kifri and Mandali swapped, which is corrected here using OCHA's locations.
+- **Kurdistan Region is less certain.** COSIT's rows don't add up to its own totals for Duhok and Erbil, some rows have mismatched Arabic and English names, and Ainkawa, Harir, Khalifan, Pirmam and Sidakan have no rows, so they only have a center. Rows for places that are now districts, like Qushtapa and Byara, become those districts' centers.
+- **All Kurdish names are drafts** that haven't been reviewed yet. [Corrections are welcome](https://github.com/karam-fikre/iraqi-data/issues).
+- **Locations** are a town from OpenStreetMap, or the middle of the area from OCHA. `center` is `null` when neither is reliable.
+
 ### Mobile networks
 
 Iraqi mobile numbers are 07 followed by 9 digits. The next digit tells the network:
@@ -372,13 +444,13 @@ Iraqi mobile numbers are 07 followed by 9 digits. The next digit tells the netwo
 ## Sources
 
 - Mobile prefixes: [libphonenumber](https://github.com/google/libphonenumber) (Google)
-- District list: [COSIT Annual Statistical Abstract 2024](https://cosit.gov.iq/documents/AAS2024/01.pdf) and the 2024 census results, as published by [City Population](https://www.citypopulation.de/en/iraq/admin/)
-- District P-codes: [OCHA / Iraq Central Statistics Office](https://data.humdata.org/dataset/cod-ab-irq), [CC BY-IGO](https://creativecommons.org/licenses/by/3.0/igo/)
+- District and sub-district lists: [COSIT Annual Statistical Abstract 2024](https://cosit.gov.iq/documents/AAS2024/01.pdf) and the 2024 census results, as published by [City Population](https://www.citypopulation.de/en/iraq/admin/)
+- P-codes: [OCHA / Iraq Central Statistics Office](https://data.humdata.org/dataset/cod-ab-irq), [CC BY-IGO](https://creativecommons.org/licenses/by/3.0/igo/)
 - Coordinates: © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, and [Wikidata](https://www.wikidata.org)
 
 ## Roadmap
 
-- Sub-districts (نواحي)
+- A Kurdish review of district and sub-district names
 
 ## Contributing
 

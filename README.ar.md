@@ -6,7 +6,7 @@
 [![CI](https://github.com/karam-fikre/iraqi-data/actions/workflows/ci.yml/badge.svg)](https://github.com/karam-fikre/iraqi-data/actions/workflows/ci.yml)
 [![license](https://img.shields.io/npm/l/iraqi-data.svg)](LICENSE)
 
-محافظات العراق وأقضيتها بالعربية والإنجليزية والكردية، جاهزة لنماذج العناوين والقوائم المنسدلة وتطبيقات التوصيل. البحث يفهم الطرق المختلفة التي يكتب بها الناس اسم المكان نفسه: `البصرة` و `البصره` و `Basrah` و `بەسرە` كلها تجد البصرة. وتقرأ أيضاً أرقام الموبايل العراقية وتتحقق منها مهما كانت طريقة كتابتها، وتعرف شركة الاتصالات، وتحوّل الأرقام العربية وتكتب الأسعار بالدينار.
+محافظات العراق وأقضيتها ونواحيها بالعربية والإنجليزية والكردية، جاهزة لنماذج العناوين والقوائم المنسدلة وتطبيقات التوصيل. البحث يفهم الطرق المختلفة التي يكتب بها الناس اسم المكان نفسه: `البصرة` و `البصره` و `Basrah` و `بەسرە` كلها تجد البصرة. وتقرأ أيضاً أرقام الموبايل العراقية وتتحقق منها مهما كانت طريقة كتابتها، وتعرف شركة الاتصالات، وتحوّل الأرقام العربية وتكتب الأسعار بالدينار.
 
 يعمل في **Node.js** و**المتصفح** و **React** و **React Native / Expo** و **Vue**، ويأتي مع أنواع TypeScript، وبلا أي اعتماديات.
 
@@ -18,7 +18,7 @@ npm install iraqi-data
 yarn add iraqi-data
 ```
 
-حجم الحزمة كاملةً مع البيانات نحو 12 كيلوبايت بعد الضغط (gzip).
+حجم الحزمة الأساسية مع البيانات نحو 13 كيلوبايت بعد الضغط (gzip). وتضيف النواحي نحو 26 كيلوبايت فقط إذا استوردتها.
 
 ## الاستخدام
 
@@ -66,6 +66,34 @@ getDistrict('ابو غريب');
 getDistrict('الدغارة')?.ar;                   // 'أكد' (الدغارة مركزه)
 getDistrictsByGovernorate('البصرة').length;    // 11
 searchDistricts('كر', { governorate: 'بغداد' }).map((d) => d.ar);  // ['الكرخ']
+```
+
+### النواحي
+
+للنواحي استيراد خاص بها، حتى لا تحمل بياناتها التطبيقات التي لا تحتاجها.
+
+```ts
+import { getSubdistrict, searchSubdistricts, getSubdistrictsByDistrict } from 'iraqi-data/subdistricts';
+
+getSubdistrict('بعشيقة');
+// {
+//   id: 'bashiqa',
+//   districtId: 'mosul',
+//   governorateId: 'nineveh',
+//   pcode: 'IQG15Q05N03',
+//   ar: 'بعشيقة',
+//   en: 'Bashiqa',
+//   ku: 'بەعشیقە',
+//   isCenter: false,
+//   center: { ar: 'بعشيقة', en: 'Bashiqa', lat: 36.4505, lng: 43.3498 },
+//   aliases: ['Bashika', 'Bashiqah']
+// }
+
+getSubdistrictsByDistrict('الموصل').map((s) => s.ar);
+// ['مركز قضاء الموصل', 'بعشيقة', 'الشورة', 'حمام العليل', 'القيارة', 'المحلبية']
+
+getSubdistrict('السلام', { district: 'الخالص' })?.districtId;  // 'khalis' (الاسم مستخدم في قضاءين)
+searchSubdistricts('سلام', { governorate: 'maysan' }).map((s) => s.ar);  // ['السلام']
 ```
 
 ### أرقام الموبايل
@@ -228,6 +256,41 @@ interface District {
 
 محافظة أقرب قضاء. هذا أقرب إلى الصحة من أقرب مركز محافظة، لأن محافظات مثل الأنبار أكبر بكثير من غيرها. تقبل خيارات `getNearestDistrict` نفسها.
 
+### `subdistricts: readonly Subdistrict[]`
+
+تُستورد من `iraqi-data/subdistricts`، مثل الدوال التالية. فيها 434 وحدة: 252 ناحية ومركز واحد لكل قضاء من الأقضية الـ 182. ترتيبها مثل `districts`، ومركز كل قضاء أولاً. المصفوفة وعناصرها مجمّدة.
+
+```ts
+interface Subdistrict {
+  id: string;             // معرّف ثابت للحفظ: 'bashiqa'
+  districtId: string;     // معرّف القضاء: 'mosul'
+  governorateId: string;  // معرّف المحافظة: 'nineveh'
+  pcode: string | null;   // رمز OCHA (أو null إذا لم تذكرها OCHA)
+  ar: string;             // الاسم بالعربية
+  en: string;             // الاسم بالإنجليزية
+  ku: string;             // الاسم بالكردية (السورانية): مسودة، انظر قسم البيانات
+  isCenter: boolean;      // true للمنطقة المحيطة بمقر القضاء (مركز القضاء)
+  center: { ar: string; en: string; lat: number; lng: number } | null;  // null إذا لم يُعرف موقع موثوق
+  aliases: string[];      // كتابات وأسماء أخرى
+}
+```
+
+### `getSubdistrict(query: string, options?: { district?: string }): Subdistrict | undefined`
+
+تجد ناحية واحدة بالمعرّف أو رمز P-code أو الاسم الكامل بأي لغة، ومنها الأسماء البديلة. واسم القضاء يجد مركزه. بعض الأسماء مستخدمة في أكثر من قضاء، فمرّر `district` (أي شيء تقبله `getDistrict`) لتحديد واحدة.
+
+### `searchSubdistricts(query: string, options?: { district?: string; governorate?: string }): Subdistrict[]`
+
+تجد كل ناحية يحتوي اسمها على النص، بترتيب `searchGovernorates` نفسه. مرّر `district` أو `governorate` للبحث داخلهما فقط.
+
+### `getSubdistrictsByDistrict(district: string): Subdistrict[]`
+
+نواحي قضاء واحد، بأي شيء تقبله `getDistrict`. وتُرجع `[]` لقضاء غير معروف.
+
+### `getNearestSubdistrict(lat: number, lng: number, options?: { maxDistance?: number }): Subdistrict | undefined`
+
+الناحية التي مركزها الأقرب إلى نقطة، وتتخطى التي ليس لها موقع معروف. تعمل مثل `getNearestDistrict` وبحدودها نفسها.
+
 ### `normalize(text: string): string`
 
 الدالة التي يستخدمها البحث لمقارنة الأسماء. هي مُصدَّرة لتقارن بها قيمك المحفوظة بالطريقة نفسها.
@@ -356,6 +419,15 @@ interface MobileNumber {
 
 `center` هو مركز القضاء، أي البلدة التي يُدار منها. غالباً تحمل اسم القضاء نفسه، لكن ليس دائماً: مركز المدائن سلمان باك، ومركز بشدر قلعة دزة. بعض الأقضية ليس لها بلدة مستقلة، مثل أحدث أقضية بغداد (الصدر الأولى والثانية والزوراء والزهور) وبمو في حلبجة، لذا نقطتها وسط المنطقة. الإحداثيات من OpenStreetMap، ومقرّبة إلى 4 منازل عشرية.
 
+### النواحي
+
+هناك 252 ناحية ومركز واحد (مركز قضاء) لكل قضاء من الأقضية الـ 182. جدول الجهاز المركزي للإحصاء فيه 432 صفاً لأنه يعدّ المراكز أيضاً.
+
+- **العراق الاتحادي** يطابق عدد الجهاز المركزي للإحصاء في المحافظات الـ 15 كلها. الجدول يطبع صفوف كفري ومندلي مبدّلة، وصُحّحت هنا اعتماداً على مواقع OCHA.
+- **إقليم كردستان أقل يقيناً.** صفوف الجدول لا تطابق مجاميعه هو في دهوك وأربيل، وبعض الصفوف فيها اسم عربي لا يطابق الإنجليزي، وعنكاوة وحرير وخليفان وبيرمام وسيدكان بلا صفوف، فلها مركز فقط. والصفوف التي صارت أقضية، مثل قوشتبة وبيارة، أصبحت مراكز لتلك الأقضية.
+- **كل الأسماء الكردية مسودات** لم تُراجع بعد. [التصحيحات مرحّب بها](https://github.com/karam-fikre/iraqi-data/issues).
+- **المواقع** هي بلدة من OpenStreetMap، أو وسط المنطقة من OCHA. وتكون `center` بقيمة `null` إذا لم يتوفر موقع موثوق.
+
 ### شبكات الموبايل
 
 أرقام الموبايل العراقية تبدأ بـ 07 ويليها 9 أرقام. الرقم الذي بعدها يحدد الشبكة:
@@ -372,13 +444,13 @@ interface MobileNumber {
 ## المصادر
 
 - بادئات الموبايل: [libphonenumber](https://github.com/google/libphonenumber) من Google
-- قائمة الأقضية: [المجموعة الإحصائية السنوية 2024](https://cosit.gov.iq/documents/AAS2024/01.pdf) ونتائج تعداد 2024 كما نشرها موقع [City Population](https://www.citypopulation.de/en/iraq/admin/)
-- رموز P-code للأقضية: [OCHA / الجهاز المركزي للإحصاء](https://data.humdata.org/dataset/cod-ab-irq)، بترخيص [CC BY-IGO](https://creativecommons.org/licenses/by/3.0/igo/)
+- قوائم الأقضية والنواحي: [المجموعة الإحصائية السنوية 2024](https://cosit.gov.iq/documents/AAS2024/01.pdf) ونتائج تعداد 2024 كما نشرها موقع [City Population](https://www.citypopulation.de/en/iraq/admin/)
+- رموز P-code: [OCHA / الجهاز المركزي للإحصاء](https://data.humdata.org/dataset/cod-ab-irq)، بترخيص [CC BY-IGO](https://creativecommons.org/licenses/by/3.0/igo/)
 - الإحداثيات: © المساهمون في [OpenStreetMap](https://www.openstreetmap.org/copyright)، و [Wikidata](https://www.wikidata.org)
 
 ## الخطط القادمة
 
-- النواحي
+- مراجعة الأسماء الكردية للأقضية والنواحي
 
 ## المساهمة
 
